@@ -1,10 +1,20 @@
-from playhouse.sqlite_ext import *
+import os
+
+from playhouse.postgres_ext import PostgresqlExtDatabase
 from peewee import Model
 from peewee import TextField, IntegerField, ForeignKeyField
+from dotenv import load_dotenv
 
-PATH_TO_DB = './db.sqlite'
+load_dotenv()
 
-sqlite_db = SqliteExtDatabase(PATH_TO_DB, pragmas={'journal_mode': 'wal'})
+
+sqlite_db = PostgresqlExtDatabase(
+    os.getenv("DB_NAME"),
+    user = os.getenv("USER_DB"),
+    password = os.getenv("PASSWORD_DB"),
+    host = os.getenv("HOST_DB"),
+    port = os.getenv("PORT_DB")
+)
 
 class BaseModel(Model):
     """A base model that will use our Sqlite database."""
@@ -33,7 +43,7 @@ class Movies(BaseModel):
     plot = TextField(column_name='plot')
     ratings = TextField(column_name='ratings')
     imdb_rating = TextField(column_name='imdb_rating')
-    writers = JSONField(column_name='writers')
+    writers = TextField(column_name='writers')
 
     class Meta:
         table_name = 'movies'

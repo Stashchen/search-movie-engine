@@ -42,19 +42,16 @@ def extract_movies() -> dict:
         data["writers_names"] = []
         data["writers"] = []
         if movie.writers:
-            for writer in movie.writers:
+            for writer in json.loads(movie.writers):
                 name_query = Writers.get(Writers.id == writer.get("id")).name
                 if name_query not in data["writers_names"] and name_query != "N/A":
                     data["writers_names"].append(Writers.get(Writers.id == writer.get("id")).name) 
                     data["writers"].append({"id" : writer.get("id"), "name" : Writers.get(Writers.id == writer.get("id")).name})
         else:
-            try:
-                name_query = Writers.get(Writers.id == movie.writer).name
-                if name_query != "N/A":
-                    data["writers_names"].append(name_query)
-                    data["writers"].append({"id" : movie.writer, "name" : name_query})
-            except Exception:
-                pass
+            name_query = Writers.get(Writers.id == movie.writer).name
+            if name_query != "N/A":
+                data["writers_names"].append(name_query)
+                data["writers"].append({"id" : movie.writer, "name" : name_query})
         movies.append(data)
         bar.next()
     bar.finish()
@@ -71,9 +68,9 @@ def load_movies(movies: list):
             {"index": {"_index": "movies", "_id": id}}
         ) + "\n" + json.dumps(movie) + "\n"
 
-    response = requests.request("POST", url, headers=headers, data=payload)
+    requests.request("POST", url, headers=headers, data=payload)
 
 
 if __name__ == "__main__":
-    from pprint import pprint
     load_movies(extract_movies())
+    print("All data is transfered")
