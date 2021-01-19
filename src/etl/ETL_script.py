@@ -23,18 +23,13 @@ from models import Actors, Movies, Movie_actors, Writers
 
 def extract_movies() -> dict:
     movies = []
-    bar = Bar('Processing', max=Movies.select().count())
+    bar = Bar('Processing', max=Movies.count())
     for movie in Movies.select().execute():
         data = {}
-        data["id"] = movie.id
-        data["imdb_rating"] = float(movie.imdb_rating) if movie.imdb_rating != ("N/A") else None
-        data["genre"] = movie.genre
-        data["title"] = movie.title
-        data["description"] = movie.plot if movie.plot != "N/A" else None
-        data["director"] = movie.director if movie.director != "N/A" else None
+        data.update(movie.to_dict())
         data["actors_names"] = []
         data["actors"] = []
-        for actor in Movie_actors.select(Movie_actors.actor_id).join(Actors).where(Movie_actors.movie_id == movie.id):
+        for actor in Movie_actors.get_all_actors(movie.id):
             actor_name = actor.actor_id.name
             if actor_name != "N/A":
                 data["actors_names"].append(actor_name)
@@ -43,15 +38,15 @@ def extract_movies() -> dict:
         data["writers"] = []
         if movie.writers:
             for writer in json.loads(movie.writers):
-                name_query = Writers.get(Writers.id == writer.get("id")).name
-                if name_query not in data["writers_names"] and name_query != "N/A":
-                    data["writers_names"].append(Writers.get(Writers.id == writer.get("id")).name) 
-                    data["writers"].append({"id" : writer.get("id"), "name" : Writers.get(Writers.id == writer.get("id")).name})
+                name = Writers.get_name(writer.get("id"))
+                if name not in data["writers_names"] and name != "N/A":
+                    data["writers_names"].append(name) 
+                    data["writers"].append({"id" : writer.get("id"), "name" : name})
         else:
-            name_query = Writers.get(Writers.id == movie.writer).name
-            if name_query != "N/A":
-                data["writers_names"].append(name_query)
-                data["writers"].append({"id" : movie.writer, "name" : name_query})
+            name = Writers.get_name(movie.writer)
+            if name != "N/A":
+                data["writers_names"].append(name)
+                data["writers"].append({"id" : movie.writer, "name" : name})
         movies.append(data)
         bar.next()
     bar.finish()
@@ -63,6 +58,7 @@ def load_movies(movies: list):
         'Content-Type': 'application/x-ndjson'
     }
     payload = ""
+
     for id, movie in enumerate(movies, start=1):
         payload+=json.dumps(
             {"index": {"_index": "movies", "_id": id}}

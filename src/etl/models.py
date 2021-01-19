@@ -45,6 +45,20 @@ class Movies(BaseModel):
     imdb_rating = TextField(column_name='imdb_rating')
     writers = TextField(column_name='writers')
 
+    def to_dict(self):
+        return {
+            "id" : self.id,
+            "imdb_rating" : float(self.imdb_rating) if self.imdb_rating != ("N/A") else None,
+            "genre" : self.genre,
+            "title" : self.title,
+            "description" : self.plot if self.plot != "N/A" else None,
+            "director" : self.director if self.director != "N/A" else None
+        }
+
+    @classmethod
+    def count(cls) -> int:
+        return cls.select().count()
+
     class Meta:
         table_name = 'movies'
 
@@ -59,6 +73,10 @@ class Movie_actors(BaseModel):
     movie_id = ForeignKeyField(Movies)
     actor_id = ForeignKeyField(Actors)
 
+    @classmethod
+    def get_all_actors(cls, movie_id) -> list:
+        return cls.select(Movie_actors.actor_id).join(Actors).where(Movie_actors.movie_id == movie_id)
+
     class Meta:
         table_name = 'movie_actors'
 
@@ -69,5 +87,8 @@ class Writers(BaseModel):
     id = TextField(primary_key=True, column_name='id')
     name = TextField(column_name='name')
 
+    @classmethod
+    def get_name(cls, id) -> str:
+        return cls.get(cls.id == id).name
     class Meta:
         table_name = 'writers'
