@@ -57,32 +57,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'simple': {
-            'format': '{levelname} - {asctime} - {module} --- {message}',
-            'style': '{',
-        }
-    },
-    'handlers': {
-        'console': {
-            'level': 'WARNING',
-            'formatter': 'simple',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'api': {
-            'handlers': ['console'],
-            'level': 'WARNING',
-            'propagate': False,
-        },
-    },
-
-}
-
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
@@ -159,3 +133,9 @@ STATIC_URL = '/static/'
 
 # Custom variables
 BASE_ES_URL = os.getenv('BASE_ES_URL')
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ]
+}

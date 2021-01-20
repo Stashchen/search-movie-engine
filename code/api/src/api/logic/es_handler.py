@@ -3,46 +3,61 @@ import requests
 from django.conf import settings
 from dataclasses import dataclass
 
-from typing import List
+from typing import List, Union
 
 from urllib.parse import urljoin
 
-from api.enums import SortField
+from api.logic.data_structures.enums import SortField
 
-from api.logic.data_classes import (
+from api.logic.data_structures.data_classes import (
    Actor, Writer, ShortMovie, Movie
 )
 
 
-def search_movies(req_params: dict):
+def _send_get_request_to_es(request_data: dict) -> requests.Response:
    """
-   :param req_params  Get request query params
+   :param request_data: Data, that will be sent to ElasticSearch
 
-   :return movies
+   :return: ElasticSearch response
    """
-   
-   sort_value = req_params.get('sort')
-   limit = req_params.get('limit')
+   return requests.get(
+      url=urljoin(settings.BASE_ES_URL, 'movies/_search'),
+      json=request_data,
+      headers={'Content-Type': 'application/json'}
+   )
+
+
+def get_movies_list(request_params: dict) -> List[ShortMovie]:
+   """
+   :param request_params: Get request query params
+
+   :return: List of movies, grabed with ElasticSearch
+   """
+
+   sort_value = request_params.get('sort')
+   sort_order = request_params.get('sort_order')
+   limit = int(request_params.get('limit'))
+   page = int(request_params.get('page'))
 
    if sort_value == SortField.TITLE.value:
-      sort_value = f'{sort_value}.raw'
+      sort_value = f'{sort_value}.raw'  # Format .raw for ElasticSearch 
 
-
-   es_request_data = {
+   request_data = {
       'size': limit,
-      'from': (req_params.get('page') - 1) * limit,
+      'from': (page - 1) * limit,
       'sort': [
          {
-            sort_value: req_params.get('sort_order')
+            sort_value: sort_order
          }
       ],
       '_source': ['id', 'title', 'imdb_rating'], 
    }
 
-   search_query = req_params.get('search')
+   # Parse string query and create request for the ElasticSearch
+   search_query = request_params.get('search')
 
    if search_query:
-      es_request_data['query'] = {
+      request_data['query'] = {
          'multi_match': {
                'query': search_query,
                'fuzziness': 'auto',
@@ -57,11 +72,7 @@ def search_movies(req_params: dict):
          }
       }
 
-   response = requests.get(
-      url=urljoin(settings.BASE_ES_URL, 'movies/_search'),
-      json=es_request_data,
-      headers={'Content-Type': 'application/json'}
-   )
+   response = _send_get_request_to_es(request_data)
 
    if not response.ok:
       response.raise_for_status()
@@ -70,13 +81,53 @@ def search_movies(req_params: dict):
    result = data['hits']['hits']
    movies = []
 
-   if movies:
-      for record in result:
-         movie_raw = record.get('_source')
-         movies.append(ShortMovie(
-            id=movie_raw.get('id'),
-            title=movie_raw.get('title'),
-            imdb_rating=movie_raw.get('imdb_rating')
-         ))
+   for record in result:
+      movie_raw = record.get('_source')
+      movies.append(ShortMovie(
+         id=movie_raw.get('id'),
+         title=movie_raw.get('title'),
+         imdb_rating=movie_raw.get('imdb_rating')
+      ))
    
    return movies
+
+def get_movie_by_id(id: str) -> Union[Movie, None]:
+   """
+   :param id: Selected movie id
+
+   :return: Selected movie details or None
+   """
+   request_data = {
+      'query': {
+         'term': {
+               'id': {
+                  'value': id
+               }
+         }
+      }
+   }
+    
+   response = _send_get_request_to_es(request_data)
+
+   if not response.ok:
+      response.raise_for_status()
+
+   data = response.json()
+
+   result = data['hits']['hits']
+
+   if not result:
+      return None
+
+   movie_raw = result[0]['_source']
+   movie = Movie(
+      id=movie_raw['id'],
+      title=movie_raw['title'],
+      imdb_rating=movie_raw['imdb_rating'],
+      description=movie_raw['description'],
+      genre=movie_raw['genre'],
+      actors=[Actor(**x) for x in movie_raw['actors']],
+      writers=[Writer(**x) for x in movie_raw['writers']],
+      directors=movie_raw['director']
+   )
+   return movie
