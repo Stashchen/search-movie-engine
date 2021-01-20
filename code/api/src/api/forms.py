@@ -4,7 +4,7 @@ from django.core.validators import MinValueValidator
 from .enums import SortField, SortOrder
 
 
-DEFAULT_MOVIES_INITIALS = {
+DEFAULT_MOVIES_FORM_INITIALS = {
     'limit': 50,
     'page': 1,
     'search': '',
