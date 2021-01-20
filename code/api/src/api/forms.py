@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import MinValueValidator
 
-from .enums import SortField, SortOrder
+from .logic.data_structures.enums import SortField, SortOrder
 
 
 DEFAULT_MOVIES_FORM_INITIALS = {
@@ -14,6 +14,9 @@ DEFAULT_MOVIES_FORM_INITIALS = {
 
 
 class MoviesSearchForm(forms.Form):
+    """
+    This form checks if the GET params, that are used as ElasticSearch details, are valid.
+    """
     limit = forms.IntegerField(min_value=0)
     page = forms.IntegerField(min_value=1)
     search = forms.CharField(required=False)
