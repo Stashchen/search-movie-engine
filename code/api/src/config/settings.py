@@ -61,26 +61,20 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
-            'format': '{levelname} - {asctime} -{module} --- {message}',
-            'style': '{',
-        },
         'simple': {
-            'format': '{levelname} - {message}',
+            'format': '{levelname} - {asctime} - {module} --- {message}',
             'style': '{',
-        },
+        }
     },
     'handlers': {
         'console': {
+            'level': 'WARNING',
+            'formatter': 'simple',
             'class': 'logging.StreamHandler',
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'WARNING',
-    },
     'loggers': {
-        'django': {
+        'api': {
             'handlers': ['console'],
             'level': 'WARNING',
             'propagate': False,
@@ -162,3 +156,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Custom variables
+BASE_ES_URL = os.getenv('BASE_ES_URL')
