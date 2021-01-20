@@ -1,7 +1,9 @@
 import requests
 import json
 from progress.bar import Bar
-from models import Actors, Movies, Movie_actors, Writers
+from models import Movies, Movie_actors, Writers
+
+BASE_URL = 'http://127.0.0.1:9200'
 
 """{
     "id": "my pretty text",
@@ -53,7 +55,7 @@ def extract_movies() -> dict:
     return movies
 
 def load_movies(movies: list):
-    url = "http://127.0.0.1:9200/_bulk?filter_path=items.*.error"
+    url = f"{BASE_URL}/_bulk?filter_path=items.*.error"
     headers = {
         'Content-Type': 'application/x-ndjson'
     }
