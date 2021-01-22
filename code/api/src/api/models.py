@@ -15,7 +15,6 @@ class Actors(models.Model):
     def __str__(self):
         return self.name
     class Meta:
-        managed = False
         db_table = 'actors'
     
 
@@ -26,7 +25,6 @@ class MovieActors(models.Model):
     id = models.IntegerField(primary_key=True)
 
     class Meta:
-        managed = False
         db_table = 'movie_actors'
 
 
@@ -36,7 +34,6 @@ class MovieWriters(models.Model):
     writer = models.ForeignKey('Writers', models.DO_NOTHING)
 
     class Meta:
-        managed = False
         db_table = 'movie_writers'
 
 
@@ -49,7 +46,6 @@ class Movies(models.Model):
     imdb_rating = models.TextField(blank=True, null=True)
     
     class Meta:
-        managed = False
         db_table = 'movies'
 
 
@@ -60,5 +56,4 @@ class Writers(models.Model):
     def __str__(self):
         return self.name
     class Meta:
-        managed = False
         db_table = 'writers'
