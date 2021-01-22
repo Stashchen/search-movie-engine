@@ -1,5 +1,8 @@
 from django import forms
-from django.forms import CharField, IntegerField, TextField
+from django.forms import CharField, IntegerField
+from django.contrib.postgres.forms.array import SimpleArrayField
+from api.models import MovieWriters, Actors, Writers
+
 
 """{
     "id": "tt0121766",
@@ -43,10 +46,18 @@ from django.forms import CharField, IntegerField, TextField
     ]
 """
 
-class Movie(forms.Form):
-    id = CharField(max_length=9, required=True)
-    imdb_rating = IntegerField(min_value=0.0, max_value=10.0, required=True)
-    genre = CharField(max_length=250, required=True)
-    title = CharField(max_length=250, required=True)
-    description = TextField()
-    director = CharField(max_length=250)
+class MovieForm(forms.Form):
+    id = CharField(max_length=9, required=False)
+    director = CharField(max_length=250, required=True, widget=forms.TextInput(attrs={'placeholder' : 'Director'}))
+    imdb_rating = IntegerField(min_value=0.0, max_value=10.0, required=True, widget=forms.NumberInput(attrs={'placeholder' : 'Imdb rating'}))
+    genre = CharField(max_length=250, required=True, widget=forms.TextInput(attrs={'placeholder' : 'Genre'}))
+    title = CharField(max_length=250, required=True, widget=forms.TextInput(attrs={'placeholder' : 'Title'}))
+    description = CharField(max_length=2000, widget=forms.Textarea(attrs={'placeholder' : 'Description'}))
+    actors = forms.ModelMultipleChoiceField(
+        queryset=Actors.objects.all(),
+        required=True
+    )
+    writers = forms.ModelMultipleChoiceField(
+        queryset=Writers.objects.all(),
+        required=True
+    )

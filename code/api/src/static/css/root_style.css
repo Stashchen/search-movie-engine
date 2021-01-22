@@ -1,5 +1,261 @@
+/*Default
+===================*/
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-size: 14px;
+    font-family: Roboto;
 }
+
+/*Search
+====================*/
+.search {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    position: relative;
+    width: 800px;
+    margin: 40px auto 0;
+}
+
+.search svg {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 15px;
+    top: 15px;
+}
+
+.search_field {
+    height: 50px;
+    border: 2px solid #6DA8FF;
+    border-radius: 10px;
+    padding-left: 50px;
+    padding-right: 20px;
+}
+
+.section {
+    width: 100%;
+    padding: 20px;
+}
+
+/*Modal window
+========================*/
+.field {
+    width: 100%;
+    margin: 2.5px 2.5px;
+}
+
+
+
+.row {
+    display: flex;
+    width: 500px;
+}
+
+label {
+    left: 0;
+    color: #616161;
+    transition: .2s;
+    cursor: text;
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 14px;
+}
+
+input[type="text"],
+input[type="number"] {
+    
+    height: 35px;
+    width: 100%;
+    margin: 5px 0;
+    padding-bottom: 2px;
+    
+    border: 1.6px solid #6DA8FF;
+    border-radius: 8px;
+    padding: 13px 13px 13px 14px;
+    -moz-appearance:textfield;
+    -webkit-appearance: textfield;
+}
+
+textarea {
+    margin: 5px 0;
+    width: 100%;
+    height: 150px;
+    min-height: 70px;
+    max-height: 300px;
+    border: 1.6px solid #6DA8FF;
+    border-radius: 8px;
+    padding: 13px 13px 13px 14px;
+    resize: vertical;
+}
+
+input:invalid,
+textarea:invalid,
+select:invalid {
+    box-shadow: none;
+}
+
+.modal{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1010;
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.modal.closed {
+    display:none;
+}
+
+.modal-overlay {
+    display: flex;
+    z-index: 1000;
+    position: fixed;
+    top:0;
+    left:0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(128, 128, 128, .7);
+}
+
+.modal-overlay.closed {
+    display: none
+}
+
+/*Choices fields
+========================*/
+.choice {
+    display: flex;
+    flex-direction: column;
+}
+
+.choice select {
+    border: 1.6px solid #6DA8FF;
+    border-radius: 8px;
+    padding: 13px 13px 13px 14px;
+    
+    margin: 5px 0;
+    width: 100%;
+}
+
+
+/*Close buttton
+===============================*/
+.cl-btn-7 {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-radius: 40px;
+    z-index: 1;
+    top: -5px;
+    right: -5px;
+    cursor: pointer;
+}
+.cl-btn-7:before {
+    content: '+';
+    color: #337AB7;
+    position: absolute;
+    z-index: 2;
+    transform: rotate(45deg);
+    font-size: 50px;
+    line-height: 1;
+    top: -5px;
+    left: 6px;
+    transition: all 0.3s cubic-bezier(0.77, 0, 0.2, 0.85);
+}
+.cl-btn-7:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+    background: #337AB7;
+    z-index: 1;
+    transition: all 0.3s cubic-bezier(0.77, 0, 0.2, 0.85);
+    transform: scale(0.01);
+}
+.cl-btn-7:hover:after {
+    transform: scale(1);
+}
+.cl-btn-7:hover:before {
+    transform: scale(0.8) rotate(45deg);
+    color: #fff;
+}
+
+
+/*Movie card
+==================*/
+.grid-container {
+    display: grid;
+    width: 100%;
+    margin: 20px auto;
+    justify-items: center;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-row-gap: 10px;
+    grid-column-gap: 10px;
+}
+
+.movie-card {
+    display: flex;
+    padding: 10px;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    background-color: white;
+    border: 1px solid grey;
+    flex-direction: column;
+    transition: .2s;
+    cursor: pointer;
+}
+
+.movie-card:hover {
+    transform: scale(1.2);
+}
+
+.movie-card p {
+    display: flex;
+    align-items: center
+}
+
+.movie-card p svg {
+    margin-right: 5px;
+}
+
+p.hidden {
+    display: none;
+}
+
+/*Modal window for edit movie
+=====================================*/
+.modal-edit{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1010;
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.modal-edit.closed {
+    display:none;
+}
+
+input[type="text"]:disabled,
+input[type="number"]:disabled,
+select:disabled,
+textarea:disabled {
+    background-color: rgb(212, 212, 212);
+    color: black;
+}
+
