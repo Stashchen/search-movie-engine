@@ -12,9 +12,12 @@ class Actors(models.Model):
     id = models.IntegerField(primary_key=True)
     name = models.TextField()
 
+    def __str__(self):
+        return self.name
     class Meta:
         managed = False
         db_table = 'actors'
+    
 
 
 class MovieActors(models.Model):
@@ -44,7 +47,7 @@ class Movies(models.Model):
     title = models.TextField(blank=True, null=True)
     plot = models.TextField(blank=True, null=True)
     imdb_rating = models.TextField(blank=True, null=True)
-
+    
     class Meta:
         managed = False
         db_table = 'movies'
@@ -54,6 +57,8 @@ class Writers(models.Model):
     id = models.TextField(primary_key=True)
     name = models.TextField(blank=True, null=True)
 
+    def __str__(self):
+        return self.name
     class Meta:
         managed = False
         db_table = 'writers'
