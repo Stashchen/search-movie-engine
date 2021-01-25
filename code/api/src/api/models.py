@@ -42,7 +42,7 @@ class Movies(models.Model):
     genre = models.TextField(blank=True, null=True)
     director = models.TextField(blank=True, null=True)
     title = models.TextField(blank=True, null=True)
-    plot = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     imdb_rating = models.TextField(blank=True, null=True)
     
     class Meta:
