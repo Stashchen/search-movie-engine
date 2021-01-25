@@ -38,18 +38,6 @@ class MovieWriters(models.Model):
         db_table = 'movie_writers'
 
 
-class Movies(models.Model):
-    id = models.TextField(primary_key=True)
-    genre = models.TextField(blank=True, null=True)
-    director = models.TextField(blank=True, null=True)
-    title = models.TextField(blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    imdb_rating = models.TextField(blank=True, null=True)
-    
-    class Meta:
-        db_table = 'movies'
-
-
 class Writers(models.Model):
     id = models.TextField(primary_key=True)
     name = models.TextField(blank=True, null=True)
@@ -58,3 +46,18 @@ class Writers(models.Model):
         return self.name
     class Meta:
         db_table = 'writers'
+
+class Movies(models.Model):
+    id = models.TextField(primary_key=True)
+    genre = models.TextField(blank=True, null=True)
+    director = models.TextField(blank=True, null=True)
+    title = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    imdb_rating = models.TextField(blank=True, null=True)
+    
+    writers = models.ManyToManyField(Writers)
+    actors = models.ManyToManyField(Actors)
+    class Meta:
+        db_table = 'movies'
+
+

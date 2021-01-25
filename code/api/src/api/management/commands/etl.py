@@ -191,3 +191,5 @@ class Command(BaseCommand):
                 print("All data is transfered to elasticsearch")
             else:
                 print("Unapplied migrations found.")
+        else:
+            print("All is in ElasticSearch")

@@ -16,10 +16,8 @@ services:
     image: postgres:12.0-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=yandex_db
+    env_file:
+      - docker.env
     ports:
       - '5432:5432'
     depends_on: 
@@ -27,6 +25,8 @@ services:
   
   api:
     build: ./code/api
+    env_file:
+      - docker.env
     command: >
       bash -c "sleep 10
       && python src/manage.py migrate
