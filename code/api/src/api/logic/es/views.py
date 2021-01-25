@@ -1,30 +1,14 @@
-# Hanlder for elastic search
-import requests
 from django.conf import settings
 from dataclasses import dataclass
 
 from typing import List, Union
-
 from urllib.parse import urljoin
 
 from api.logic.data_structures.enums import SortField
-
 from api.logic.data_structures.data_classes import (
    Actor, Writer, ShortMovie, Movie
 )
-
-
-def _send_get_request_to_es(request_data: dict) -> requests.Response:
-   """
-   :param request_data: Data, that will be sent to ElasticSearch
-
-   :return: ElasticSearch response
-   """
-   return requests.get(
-      url=urljoin(settings.BASE_ES_URL, 'movies/_search'),
-      json=request_data,
-      headers={'Content-Type': 'application/json'}
-   )
+from api.logic.es import es_requests
 
 
 def get_movies_list(request_params: dict) -> List[ShortMovie]:
@@ -72,7 +56,7 @@ def get_movies_list(request_params: dict) -> List[ShortMovie]:
          }
       }
 
-   response = _send_get_request_to_es(request_data)
+   response = es_requests.get('movies', request_data)
 
    if not response.ok:
       response.raise_for_status()
@@ -107,7 +91,7 @@ def get_movie_by_id(id: str) -> Union[Movie, None]:
       }
    }
     
-   response = _send_get_request_to_es(request_data)
+   response = es_requests.get('movies', request_data)
 
    if not response.ok:
       response.raise_for_status()

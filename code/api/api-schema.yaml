@@ -73,6 +73,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+    post:
+      tags:
+      - movies
+      summary: Добаление нового фильма
+      responses:
+        200:
+          description: "Фильм был удачно добавлен"
+          
+                  
   /movies/{movieID}:
     get:
       tags:
@@ -96,6 +105,20 @@ paths:
         404:
           description: Фильм не найден
           content: {}
+    put:
+      tags:
+      - movies
+      summary: Обновление фильма
+      responses:
+        200:
+          description: "Фильм обновлён успешно"
+    delete:
+      tags:
+      - movies
+      summary: Удаление фильма
+      responses:
+        204:
+          description: "Фильм удалён успешно"
 components:
   schemas:
     ShortMovie:

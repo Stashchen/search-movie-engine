@@ -14,14 +14,15 @@ class Actors(models.Model):
 
     def __str__(self):
         return self.name
+        
     class Meta:
         db_table = 'actors'
     
 
 
 class MovieActors(models.Model):
-    movie = models.ForeignKey('Movies', models.DO_NOTHING)
-    actor = models.ForeignKey(Actors, models.DO_NOTHING, blank=True, null=True)
+    movie = models.ForeignKey('Movies', models.CASCADE)
+    actor = models.ForeignKey(Actors, models.CASCADE, blank=True, null=True)
     id = models.IntegerField(primary_key=True)
 
     class Meta:
@@ -30,8 +31,8 @@ class MovieActors(models.Model):
 
 class MovieWriters(models.Model):
     id = models.IntegerField(primary_key=True)
-    movie = models.ForeignKey('Movies', models.DO_NOTHING)
-    writer = models.ForeignKey('Writers', models.DO_NOTHING)
+    movie = models.ForeignKey('Movies', models.CASCADE)
+    writer = models.ForeignKey('Writers', models.CASCADE)
 
     class Meta:
         db_table = 'movie_writers'
@@ -42,7 +43,7 @@ class Movies(models.Model):
     genre = models.TextField(blank=True, null=True)
     director = models.TextField(blank=True, null=True)
     title = models.TextField(blank=True, null=True)
-    plot = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     imdb_rating = models.TextField(blank=True, null=True)
     
     class Meta:
