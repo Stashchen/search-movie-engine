@@ -21,9 +21,6 @@ from .logic.es.views import get_movies_list, get_movie_by_id
 from .serializers import MoviesSerializer
 
 
-from pprint import pprint
-
-
 def _process_es_and_django_funcs(django_func, es_func, django_params={}, es_params={}) -> None:
     """
     Check that both: django and es func pass.
