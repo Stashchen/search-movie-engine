@@ -13,12 +13,12 @@ from rest_framework.views import APIView
 
 from .logic.parse_func import parse_movies_get_params
 from .forms import MoviesSearchForm
-from .models import Movies
+from .models import Movie
 
 from .logic.es import es_requests
-from .logic.es.views import get_movies_list, get_movie_by_id
+from .logic.es.views import get_movies_list
 
-from .serializers import MoviesSerializer
+from .serializers import MovieSerializer
 
 
 def _process_es_and_django_funcs(django_func, es_func, django_params={}, es_params={}) -> None:
@@ -60,13 +60,13 @@ class MovieList(APIView):
         form = MoviesSearchForm(form_data)  # For is used to check validation of the params
 
         validation_errors = []
-        if not form.is_valid():            
+        if not form.is_valid():  # Check for errors           
             validation_errors = _validation_errors_to_dict(form.errors)
 
-        if validation_errors:
+        if validation_errors:  # Handle errors
             return Response(validation_errors, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        movies = get_movies_list(form_data)
+        movies = get_movies_list(form_data) 
 
         return Response(data=[movie.to_dict() for movie in movies])
 
@@ -91,13 +91,15 @@ class MoveDetails(APIView):
     View, that is invoked by `movies/{movieID}` path
     """
     def get(self, request, movieID, format=None):
-        movie = get_movie_by_id(movieID)
-        
 
-        if movie is None:
+        try:
+            movie = Movie.objects.get(id=movieID)
+        except Movie.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-        
-        return Response(movie.to_dict())
+
+        serializer = MovieSerializer(movie)
+
+        return Response(serializer.data)
 
     def put(self, request, movieID, format=None):
         
