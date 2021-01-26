@@ -1,5 +1,6 @@
 import requests
 import json
+import os
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -14,117 +15,10 @@ from api.models import Movie
 from api.logic.data_structures.enums import Positions
 
 def init_es() -> Request():
-    url = f"{settings.BASE_ES_URL}movies"
 
-    payload="""
-        {
-        "settings": {
-            "refresh_interval": "1s",
-            "analysis": {
-            "filter": {
-                "english_stop": {
-                "type":       "stop",
-                "stopwords":  "_english_"
-                },
-                "english_stemmer": {
-                "type": "stemmer",
-                "language": "english"
-                },
-                "english_possessive_stemmer": {
-                "type": "stemmer",
-                "language": "possessive_english"
-                },
-                "russian_stop": {
-                "type":       "stop",
-                "stopwords":  "_russian_"
-                },
-                "russian_stemmer": {
-                "type": "stemmer",
-                "language": "russian"
-                }
-            },
-            "analyzer": {
-                "ru_en": {
-                "tokenizer": "standard",
-                "filter": [
-                    "lowercase",
-                    "english_stop",
-                    "english_stemmer",
-                    "english_possessive_stemmer",
-                    "russian_stop",
-                    "russian_stemmer"
-                ]
-                }
-            }
-            }
-        },
-        "mappings": {
-            "dynamic": "strict",
-            "properties": {
-            "id": {
-                "type": "keyword"
-            },
-            "imdb_rating": {
-                "type": "float"
-            },
-            "genre": {
-                "type": "keyword"
-            },
-            "title": {
-                "type": "text",
-                "analyzer": "ru_en",
-                "fields": {
-                "raw": { 
-                    "type":  "keyword"
-                }
-                }
-            },
-            "description": {
-                "type": "text",
-                "analyzer": "ru_en"
-            },
-            "director": {
-                "type": "text",
-                "analyzer": "ru_en"
-            },
-            "actors_names": {
-                "type": "text",
-                "analyzer": "ru_en"
-            },
-            "writers_names": {
-                "type": "text",
-                "analyzer": "ru_en"
-            },
-            "actors": {
-                "type": "nested",
-                "dynamic": "strict",
-                "properties": {
-                "id": {
-                    "type": "keyword"
-                },
-                "name": {
-                    "type": "text",
-                    "analyzer": "ru_en"
-                }
-                }
-            },
-            "writers": {
-                "type": "nested",
-                "dynamic": "strict",
-                "properties": {
-                "id": {
-                    "type": "keyword"
-                },
-                "name": {
-                    "type": "text",
-                    "analyzer": "ru_en"
-                }
-                }
-            }
-            }
-        }
-        }
-    """
+    url = f"{settings.BASE_ES_URL}movies"
+    with open(settings.BASE_DIR / 'api/management/commands/es_mapping.json', mode='r') as mapping:
+        payload=json.load(mapping)
     headers = {
     'Content-Type': 'application/json'
     }
@@ -151,13 +45,13 @@ def movie_to_dict(movie : Movie) -> dict:
         if name not in data["writers_names"] and name != "N/A":
             data["writers_names"].append(name) 
             data["writers"].append({"id" : writer.person_id.id, "name" : name})
+    return data
 
 def extract_movies() -> dict:
     movies = []
     bar = Bar('Processing', max=Movie.objects.count())
     for movie in Movie.objects.all():
-        data = movie_to_dict(movie)
-        movies.append(data)
+        movies.append(movie_to_dict(movie))
         bar.next()
     bar.finish()
     return movies
