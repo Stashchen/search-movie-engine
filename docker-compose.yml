@@ -27,17 +27,10 @@ services:
   
   api:
     build: ./code/api
-    command: >
-      bash -c "sleep 10
-      && python src/manage.py migrate
-      && python src/manage.py makemigrations api
-      && python src/manage.py migrate
-      && python src/manage.py loaddata initial_data.json
-      && python src/manage.py etl
-      && python src/manage.py runserver 0.0.0.0:8000"
+    command: sh -c "dockerize -wait http://elasticsearch:9200 && python3.8 src/manage.py runserver 0.0.0.0:8000"
     ports:
       - 8000:8000
-    depends_on: 
+    depends_on:
       - db
 
 volumes:
