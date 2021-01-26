@@ -6,30 +6,16 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.forms.models import model_to_dict
-
 from .logic.parse_func import parse_movies_get_params
 from .forms import MoviesSearchForm
 from .models import Movies
+
+from api.management.commands.etl import movie_to_dict
 
 from .logic.es import es_requests
 from .logic.es.views import get_movies_list, get_movie_by_id
 
 from .serializers import MoviesSerializer
-
-@receiver(post_save, sender=Movies)
-def handler(sender, instance, created, **kwargs):
-    print(sender.__dict__)
-    es_params={
-        'es_index': 'movies', 
-        'request_data': model_to_dict(instance),
-    }
-    if not created:
-        es_requests.post(**es_params)
-    else:
-        es_params['es_id'] = es_requests.get_es_object_id('movies', {'id': instance.id})
 
 def _process_es_and_django_funcs(django_func, es_func, django_params={}, es_params={}) -> None:
     """
@@ -39,7 +25,8 @@ def _process_es_and_django_funcs(django_func, es_func, django_params={}, es_para
     :param es_func: ElasticSearch functionality
     """
     try:
-        django_func(**django_params)
+        movie = django_func(**django_params)
+        es_params['request_data'] = movie_to_dict(movie)
         es_func(**es_params)
     except Exception as e:
         logging.error(e)
@@ -83,10 +70,15 @@ class MovieList(APIView):
     def post(self, request, format=None):
         # Add new movie
         serializer = MoviesSerializer(data=request.data)
-
         
         if serializer.is_valid():
-            serializer.save()
+            _process_es_and_django_funcs(
+                django_func=serializer.save,  # Save into db
+                es_func=es_requests.post,  # Send data to ES
+                es_params={
+                    'es_index': 'movies'
+                }
+            )
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -103,17 +95,20 @@ class MoveDetails(APIView):
         return Response(movie.to_dict())
 
     def put(self, request, movieID, format=None):
-        
         try:
             movie = Movies.objects.get(id=movieID)
         except Movies.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
-
         serializer = MoviesSerializer(instance=movie, data=request.data)
-        print(serializer)
-        print(serializer.error_messages)
         if serializer.is_valid():
-            serializer.save()
+            _process_es_and_django_funcs(
+                django_func=serializer.save,  # Save into db
+                es_func=es_requests.put,  # Update data in ES
+                es_params={
+                    'es_index': 'movies',
+                    'es_id': es_requests.get_es_object_id('movies', {'id': movieID})
+                }
+            )
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
