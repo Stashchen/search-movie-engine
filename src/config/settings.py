@@ -34,18 +34,22 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-INSTALLED_APPS = [
+DEVELOPED_APPS = [
+    'api'
+]
+
+INSTALLED_APPS = DEVELOPED_APPS + [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     'corsheaders',
     'rest_framework',
 
-    'api',
-    'movie_site'
+    'django_extensions',
 ]
 
 MIDDLEWARE = [

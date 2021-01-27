@@ -2,11 +2,10 @@ import json
 
 from peewee import *
 from playhouse import shortcuts
-from django.conf import settings
-from pprint import pprint
 
-database = SqliteDatabase(settings.BASE_DIR / 'api/management/commands/sqlite_yandex_db.sqlite')
-# database = SqliteDatabase('sqlite_yandex_db.sqlite')
+from pathlib import Path
+
+database = SqliteDatabase(Path(__file__).parent / 'tmp/sqlite_yandex_db.sqlite')
 
 class UnknownField(object):
     def __init__(self, *_, **__): pass
@@ -33,12 +32,18 @@ class BaseModel(Model):
             raise NameError("This method allows only in Actors and Writers class")
 
 class Actors(BaseModel):
+    """
+    Model that contains information about people that take a role in film like actors
+    """
     name = TextField(null=True)
 
     class Meta:
         table_name = 'actors'
 
 class MovieActors(BaseModel):
+    """
+    This table store data about what people take a role in what film
+    """
     actor_id = TextField(null=True)
     movie_id = TextField(null=True)
 
@@ -49,6 +54,9 @@ class MovieActors(BaseModel):
 
 
 class Movies(BaseModel):
+    """
+    Representation the information about film
+    """
     director = TextField(null=True)
     genre = TextField(null=True)
     id = TextField(null=True, primary_key=True)
@@ -62,7 +70,14 @@ class Movies(BaseModel):
     class Meta:
         table_name = 'movies'
     
+    @classmethod
+    def get_directors(cls):
+        return [movie.director for movie in cls.select(cls.director).distinct().execute()]
+
     def to_dict(self):
+        """
+        Transefer PeeweeQuerySet for class Movie in the dict with some modifications like 
+        """
         data = shortcuts.model_to_dict(self)
         data['director'] = data.get('director').replace(", ", ",").split(',') if data.get('director') != "N/A" else ""
         data['genre'] = data.get('genre').replace(", ", ",").split(',')
@@ -74,15 +89,23 @@ class Movies(BaseModel):
         return data
 
     def get_actors(self):
+        """
+        Return all actor names that take a roles in this film
+        """
         for actor in MovieActors.select(Actors).join(Actors, on=(Actors.id == MovieActors.actor_id)).where(MovieActors.movie_id == self.id):
             yield actor.actors.name
     
     def get_writers(self):
+        """
+        Return all writer names that take a roles in this film
+        """
         if self.writers:
             for writer in json.loads(self.writers):
                 yield Writers.get(id=writer.get('id')).name
         else:
             yield Writers.get(id=self.writer).name
+    
+
             
 
 class RatingAgency(BaseModel):
@@ -109,18 +132,17 @@ class Writers(BaseModel):
         table_name = 'writers'
 
 class People:
+    """
+    Representation information about all people (writers, actors )
+    """
     @staticmethod
     def all_person():
-        person={
-            writer_name for writer_name in Writers.get_names()
-        }.union({actor_name for actor_name in Actors.get_names()})
+        person={writer_name for writer_name in Writers.get_names()}\
+            .union({actor_name for actor_name in Actors.get_names()})\
+            .union({director_name for director_name in Movies.get_directors()})
         for people in person:
             if people == "N/A":
                 continue
             yield people
-# for movie in Movies.select().execute():
-#     pprint(movie.to_dict())
-# # print(len(person))
-# print([actor.actors.name for actor in MovieActors.select(Actors).join(Actors, on=(Actors.id == MovieActors.actor_id)).where(MovieActors.movie_id == "tt0076759")])
-# movie = Movies.get(id="tt0202470")
-# print(list(movie.get_writers()))
+
+# print(Movies.get_directors())

@@ -13,10 +13,12 @@ from requests.models import Request
 from api.models import Movie
 from api.logic.data_structures.enums import Positions
 
+from pathlib import Path
+
 def init_es() -> Request():
 
     url = f"{settings.BASE_ES_URL}movies"
-    with open(settings.BASE_DIR / 'api/management/commands/es_mapping.json', mode='r') as mapping:
+    with open(Path(__file__).parent / 'tmp/es_mapping.json', mode='r') as mapping:
         payload=json.load(mapping)
     headers = {
     'Content-Type': 'application/json'
