@@ -1,6 +1,5 @@
 import requests
 import json
-import os
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -25,8 +24,15 @@ def init_es() -> Request():
 
     return requests.request("PUT", url, headers=headers, data=payload)
 
-
 def movie_to_dict(movie : Movie) -> dict:
+    """Convert Movie model to dict for sending data to ElasticSearch
+
+    Args:
+        movie (Movie): the movie that you want to convert to ElasticSearch
+
+    Returns:
+        dict: Converted Movie model
+    """
     data = {}
     data.update(model_to_dict(movie, exclude=["crew", "genre"]))
     data["genre"] = ", ".join([genre.name for genre in movie.genre.all()])
