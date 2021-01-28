@@ -48,8 +48,6 @@ INSTALLED_APPS = DEVELOPED_APPS + [
     
     'corsheaders',
     'rest_framework',
-
-    'django_extensions',
 ]
 
 MIDDLEWARE = [
