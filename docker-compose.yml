@@ -26,8 +26,10 @@ services:
       - elasticsearch
   
   api:
-    build: ./code/api
-    command: sh -c "dockerize -wait http://elasticsearch:9200 && python3.8 src/manage.py runserver 0.0.0.0:8000"
+    build: ./src
+    command: sh -c "dockerize -wait http://elasticsearch:9200 && python manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - .env
     ports:
       - 8000:8000
     depends_on:

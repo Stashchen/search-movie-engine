@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Movie, PersonPosition, Genre, Person
-from .data_structures import Positions
+from .logic.data_structures.enums import Positions
 
 
 class GenreSerializer(serializers.ModelSerializer):
