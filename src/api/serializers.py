@@ -1,17 +1,44 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework import serializers
+from .models import Movie, PersonPosition, Genre, Person
+from .logic.data_structures.enums import Positions
 
-from .models import Movies
 
+class GenreSerializer(serializers.ModelSerializer):
 
-class MoviesSerializer(ModelSerializer):
+    def to_representation(self, instance):
+        return instance.name
 
     class Meta:
-        model = Movies
+        model = Genre
+        fields = '__all__'
+
+class PersonSerializer(serializers.ModelSerializer):
+    
+    def to_representation(self, instance):
+        return instance.name
+
+    class Meta:
+        model = Person
+        fields = ('name', )
+
+class PersonPositionSerializer(serializers.ModelSerializer):
+    
+    person_id = PersonSerializer() 
+
+    class Meta:
+        model = PersonPosition
+        fields = ('id', 'person_id', 'position')
+
+
+class MovieSerializer(serializers.ModelSerializer):
+
+    genre = GenreSerializer(many=True)
+    crew = PersonPositionSerializer(
+        source='personposition_set', many=True
+    )
+
+    class Meta:
+        model = Movie
         fields = (
-            'id', 
-            'title', 
-            'description', 
-            'genre', 
-            'director', 
-            'imdb_rating'
+            'id', 'title', 'description', 'imdb_rating', 'genre', 'crew'
         )
