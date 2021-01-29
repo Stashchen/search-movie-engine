@@ -1,5 +1,5 @@
 from django.db import models
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 from .logic.data_structures.enums import Positions
 
@@ -10,7 +10,7 @@ class Person(models.Model):
     """
     name = models.CharField("Name", max_length=50)
 
-    def __str__(self):
+    def __str__(self): # pragma: no cover
         return self.name
     
 class Movie(models.Model):
@@ -20,11 +20,11 @@ class Movie(models.Model):
     id = models.CharField("Id", max_length=36, primary_key=True)
     title = models.CharField("Title", max_length=100)
     description = models.TextField("Description", max_length=1500)
-    imdb_rating = models.FloatField("Rating", validators=[MinValueValidator(0)])
+    imdb_rating = models.FloatField("Rating", validators=[MinValueValidator(0), MaxValueValidator(10)])
     crew = models.ManyToManyField("Person", verbose_name="Movie crew", through='PersonPosition')
     genre = models.ManyToManyField("Genre", verbose_name="Genres")
 
-    def __str__(self):
+    def __str__(self): # pragma: no cover
         return self.title
     
 class PersonPosition(models.Model):
@@ -41,6 +41,6 @@ class Genre(models.Model):
     """
     name = models.CharField("Name", max_length=50)
 
-    def __str__(self):
+    def __str__(self): # pragma: no cover
         return self.name
     
