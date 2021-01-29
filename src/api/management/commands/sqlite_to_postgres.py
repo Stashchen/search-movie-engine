@@ -16,6 +16,7 @@ def etl_person():
     ])
 
 
+
 def etl_movie():
     # Load all person (actors, directors and writers)
     # etl_person()
@@ -56,7 +57,7 @@ class Command(BaseCommand):
     help = 'Load data from SQLite database to PostgreSQL and to elasticsearch'
 
     def handle(self, *args, **options):
-        call_command("flush")
+        call_command("flush", '--noinput')
         etl_person()
         etl_movie()
         print("All data are transfered from sqlite to postgresql")
