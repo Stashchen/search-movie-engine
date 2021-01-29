@@ -43,7 +43,8 @@
     "dynamic": "strict",
     "properties": {
     "id": {
-        "type": "keyword"
+        "type": "text",
+        "fielddata": true
     },
     "imdb_rating": {
         "type": "float"
