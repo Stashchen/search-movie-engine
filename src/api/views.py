@@ -14,7 +14,7 @@ from rest_framework.views import APIView
 from .logic.parse_func import parse_movies_get_params
 from .forms import MoviesSearchForm
 from .models import Movie
-
+from .management.commands.etl import movie_to_dict
 from .logic.es import es_requests
 from .logic.es.views import get_movies_list
 
@@ -29,7 +29,8 @@ def _process_es_and_django_funcs(django_func, es_func, django_params={}, es_para
     :param es_func: ElasticSearch functionality
     """
     try:
-        django_func(**django_params)
+        instance = django_func(**django_params)
+        es_params['request_data'] = movie_to_dict(instance) if isinstance(instance, Movie) else {}
         es_func(**es_params)
     except Exception as e:
         logging.error(e)
@@ -72,15 +73,14 @@ class MovieList(APIView):
 
     def post(self, request, format=None):
         # Add new movie
-        serializer = MoviesSerializer(data=request.data)
+        serializer = MovieSerializer(data=request.data)
 
         if serializer.is_valid():
             _process_es_and_django_funcs(
                 django_func=serializer.save,  # Save into db
                 es_func=es_requests.post,  # Send data to ES
                 es_params={
-                    'es_index': 'movies', 
-                    'request_data': serializer.data
+                    'es_index': 'movies'
                 }
             )
             return Response(status=status.HTTP_200_OK)
@@ -104,15 +104,19 @@ class MoveDetails(APIView):
     def put(self, request, movieID, format=None):
         
         try:
-            movie = Movies.objects.get(id=movieID)
-        except Movies.DoesNotExist:
+            movie = Movie.objects.get(id=movieID)
+        except Movie.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
-        serializer = MoviesSerializer(instance=movie, data=request.data)
+        serializer = MovieSerializer(instance=movie, data=request.data)
 
         if serializer.is_valid():
             _process_es_and_django_funcs(
-                django_func=serializer.save,  # Save into db
+                django_func=serializer.update,  # Save into db
+                django_params={
+                    "instance" : movie,
+                    "validated_data" : serializer.validated_data
+                },
                 es_func=es_requests.put,  # Update data in ES
                 es_params={
                     'es_index': 'movies',
@@ -125,8 +129,8 @@ class MoveDetails(APIView):
 
     def delete(self, request, movieID, format=None):
         try:
-            movie = Movies.objects.get(id=movieID)
-        except Movies.DoesNotExist:
+            movie = Movie.objects.get(id=movieID)
+        except Movie.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         _process_es_and_django_funcs(
@@ -134,7 +138,6 @@ class MoveDetails(APIView):
             es_func=es_requests.delete,
             es_params={
                 'es_index': 'movies',
-                'request_data': {},
                 'es_id': es_requests.get_es_object_id('movies', {'id': movieID})
             }
         )

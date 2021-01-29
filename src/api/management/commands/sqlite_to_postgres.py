@@ -11,18 +11,20 @@ from api.management.commands._sqlite_models import (
 )
 
 def etl_person():
-    # Load all person (actors, directors and writers)
     Person.objects.bulk_create([
         Person(name=people_name) for people_name in People.all_person()
     ])
 
 
-def etl_movie(limit = None):
+
+def etl_movie():
+    # Load all person (actors, directors and writers)
+    # etl_person()
 
     # Load all other data (movies, genres and person_position)
-    bar = Bar("processing", max=Movies.select().limit(limit).count())
+    bar = Bar("processing", max=Movies.select().count())
     bar.start()
-    for movie in Movies.select().limit(limit).execute():
+    for movie in Movies.select().execute():
         movie_dict = movie.to_dict() # Convert movie to dict and modificate some data
         
         genres = [Genre.objects.get_or_create(name=genre)[0] for genre in movie_dict.get('genre')] 

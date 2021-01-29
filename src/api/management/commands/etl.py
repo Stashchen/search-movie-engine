@@ -15,7 +15,6 @@ from api.models import Movie
 from api.logic.data_structures.enums import Positions
 
 from pathlib import Path
-from pprint import pprint
 
 def init_es() -> Request():
     url = f"{settings.BASE_ES_URL}movies"
@@ -29,7 +28,6 @@ def init_es() -> Request():
 
 def movie_to_dict(movie : Movie) -> dict:
     """Convert Movie model to dict for sending data to ElasticSearch
-
     Args:
         movie (Movie): the movie that you want to convert to ElasticSearch
 
@@ -53,6 +51,7 @@ def movie_to_dict(movie : Movie) -> dict:
             data["actors"].append({"id" : actor_person.person_id.id, "name" : actor_name})
     data["writers_names"] = []
     data["writers"] = []
+
     writers = movie.personposition_set.filter(position=Positions.WRITER)
     for writer in writers:
         name = writer.person_id.name
