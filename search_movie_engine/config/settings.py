@@ -35,10 +35,10 @@ ALLOWED_HOSTS = []
 # Application definition
 
 DEVELOPED_APPS = [
-    'api'
+    'api',
 ]
 
-INSTALLED_APPS = DEVELOPED_APPS + [
+INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -48,7 +48,8 @@ INSTALLED_APPS = DEVELOPED_APPS + [
     
     'corsheaders',
     'rest_framework',
-]
+    
+] + DEVELOPED_APPS
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -158,7 +159,7 @@ REST_FRAMEWORK = {
 }
 
 FIXTURE_DIRS = [
-    os.path.join(BASE_DIR, 'fixtures')
+    os.path.join(BASE_DIR, 'api/fixtures')
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True # If this is used then `CORS_ORIGIN_WHITELIST` will not have any effect

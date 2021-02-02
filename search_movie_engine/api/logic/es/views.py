@@ -28,7 +28,7 @@ def get_movies_list(request_params: dict) -> List[ShortMovie]:
 
    request_data = {
       'size': limit,
-      'from': (page - 1) * limit,
+      'from': (page - 1) * limit, # Cannot be more than 10.000
       'sort': [
          {
             sort_value: sort_order
@@ -55,7 +55,7 @@ def get_movies_list(request_params: dict) -> List[ShortMovie]:
                ]
          }
       }
-
+   
    response = es_requests.get('movies', request_data)
 
    if not response.ok:

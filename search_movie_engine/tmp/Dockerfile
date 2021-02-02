@@ -16,7 +16,7 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
 RUN ln -s /bin/python3.8 /bin/python
 
 # Setup Project
-WORKDIR /src
+WORKDIR /search_movie_engine
 
 RUN pip3 install --upgrade pip
 COPY ./requirements.txt .

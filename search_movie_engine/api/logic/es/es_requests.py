@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 from django.conf import settings
 
 
-def get_es_object_id(es_index: str, query_params: dict):
+def get_es_object_id(es_index: str, query_params: dict) -> str:
     """
     :param es_index:  ElasticSearch index
     :param query_params:  Dictionary that stores data for search request

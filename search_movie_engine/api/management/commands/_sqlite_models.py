@@ -5,7 +5,7 @@ from playhouse import shortcuts
 
 from pathlib import Path
 
-database = SqliteDatabase(Path(__file__).parent / 'tmp/sqlite_yandex_db.sqlite')
+database = SqliteDatabase(Path(__file__).parent / 'yandex_files/sqlite_yandex_db.sqlite')
 
 class UnknownField(object):
     def __init__(self, *_, **__): pass

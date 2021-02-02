@@ -1,0 +1,8 @@
+[run]
+source = .
+omit = 
+    ./venv/*
+    ./config/*
+    ./api/apps.py
+    ./api/migrations/*
+    ./manage.py

@@ -64,5 +64,6 @@ pip install -r requirements.txt
 3. Create *.env* file, based on *.env.example*
 4. Run server
 ```
-python src/manage.py runserver
+cd search_movie_engine
+python manage.py runserver
 ```

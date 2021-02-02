@@ -12,9 +12,10 @@ from django.db.migrations.exceptions import BadMigrationError
 from rest_framework.test import APITestCase
 
 from api.logic.data_structures.enums import Positions
+from api.logic.es import es_requests
 from api.models import Movie, Person, PersonPosition, Genre
 from api.management.commands._sqlite_models import *
-
+from api.views import _process_es_and_django_funcs
 
 def fail_init_es():
     raise requests.exceptions.ConnectionError
@@ -23,9 +24,10 @@ def fail_init_es():
 class Test(TestCase):
     fixtures = ['init_data.json']
 
-    def setUp(self) -> None:
-        # self.client = RequestsClient()
-        return super().setUp()
+    # def setUp(self) -> None:
+    #     call_command('sqlite_to_postgres')
+    #     call_command('etl')
+    #     # return super().setUp()
 
     def test_command_sqlite_to_postgres(self):
         call_command('sqlite_to_postgres')
@@ -42,6 +44,10 @@ class Test(TestCase):
     def test_command_etl_no_migrations(self, mock_migrations):
         self.assertRaises(BadMigrationError, call_command, 'etl')
 
+    def test_sqlite_models(self):
+        with self.assertRaises(NameError):
+            list(MovieActors.get_names())
+    
     def test_person(self):
         self.assertEqual(Person.objects.count(), 4133)
         self.assertEqual(Person.objects.filter(name="N/A").count(), 0)
@@ -64,7 +70,9 @@ class ApiTest(APITestCase):
     fixtures = ['init_data.json']
 
     # def setUp(self) -> None:
-    #     return super().setUp()
+    #     call_command('sqlite_to_postgres')
+    #     call_command('etl')
+    #     # return super().setUp()
 
     def test_get_movies(self):
         response = self.client.get('/api/movies/', {'limit' : Movie.objects.count()}, format='json')
@@ -76,6 +84,16 @@ class ApiTest(APITestCase):
     def test_bad_get_movies(self, mock_is_valid, mock_erros):
         response = self.client.get('/api/movies/', {'limit' : Movie.objects.count()}, format='json')
         self.assertEqual(response.status_code, 422)
+
+    def test_get_error_movies(self):
+        response = self.client.get('/api/movies/', {'limit' : "Nikita"}, format='json')
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json(), [{"loc":["query","limit"],"msg":"Enter a whole number."}])
+
+    def test_get_es_object_id(self):
+        call_command('etl')
+        id = es_requests.get_es_object_id('movies', {"id" : Movie.objects.first().id})
+        self.assertEquals(type(id), str)
 
     def test_post_movies(self):
         url = '/api/movies/'
